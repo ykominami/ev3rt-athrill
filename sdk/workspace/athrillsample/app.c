@@ -192,7 +192,7 @@ static bool_t keep_balance() {
 void balance_task(intptr_t unused) {
     ER ercd;
     int i;
-
+    syslog(LOG_EMERG, "B-T 1");
     /**
      * Reset
      */
@@ -224,6 +224,7 @@ void balance_task(intptr_t unused) {
     /**
      * Main loop for the self-balance control algorithm
      */
+    syslog(LOG_EMERG, "B-T 2");
     while(1) {
         // Update the interval time
         update_interval_time();
@@ -243,7 +244,9 @@ void balance_task(intptr_t unused) {
             return;
         }
 
+    syslog(LOG_EMERG, "B-T 3");
         tslp_tsk(WAIT_TIME_MS);
+    syslog(LOG_EMERG, "B-T 4");
     }
 }
 
@@ -293,6 +296,7 @@ static FILE *bt = NULL;
 
 void idle_task(intptr_t unused) {
     while(1) {
+    syslog(LOG_EMERG, "I-T 1");
     	fprintf(bt, "Press 'h' for usage instructions.\n");
     	tslp_tsk(1000);
     }
@@ -320,6 +324,7 @@ static void put_log(LogDataType *data)
 #endif
 
 void main_task(intptr_t unused) {
+    syslog(LOG_EMERG, "M-T 1");
     ev3_led_set_color(LED_GREEN);
     // Register button handlers
     ev3_button_set_on_clicked(BACK_BUTTON, button_clicked_handler, BACK_BUTTON);
@@ -335,6 +340,7 @@ void main_task(intptr_t unused) {
     ev3_motor_config(left_motor, LARGE_MOTOR);
     ev3_motor_config(right_motor, LARGE_MOTOR);
   
+    syslog(LOG_EMERG, "M-T 2");
 #if 0 
     LogDataType log_data;
     int i = 0;
@@ -371,7 +377,9 @@ void main_task(intptr_t unused) {
             ev3_motor_steer(left_motor, right_motor, 10, steer);
             lasterror = error;
         }
+    syslog(LOG_EMERG, "M-T 3");
         tslp_tsk(100000); /* 100msec */
+    syslog(LOG_EMERG, "M-T 4");
 
     }
 }
