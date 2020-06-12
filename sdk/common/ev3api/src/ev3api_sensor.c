@@ -43,6 +43,7 @@ int16_t analog_sensor_get_pin1(sensor_port_t port) {
 static
 void uart_sensor_fetch_data(sensor_port_t port, uint8_t mode, void *dest, SIZE size)
 {
+  syslog(LOG_EMERG , "uart_sensor_fetch_data port=%d mode=%d", port, mode);
 	sensor_type_t type = ev3_sensor_get_type(port);
 	switch (type) {
 		case ULTRASONIC_SENSOR:
@@ -100,9 +101,10 @@ error_exit:
 
 ER_UINT ev3_sensor_get_type(sensor_port_t port) {
 	ER ercd;
-
+	syslog(LOG_EMERG, "ev3_sensor_get_type 1");
 //	lazy_initialize();
 	CHECK_PORT(port);
+	syslog(LOG_EMERG, "ev3_sensor_get_type 2");
 
 	return sensors[port];
 
@@ -121,15 +123,18 @@ colorid_t ev3_color_sensor_get_color(sensor_port_t port) {
 	ER ercd;
 
 //	lazy_initialize();
+	syslog(LOG_EMERG , "ev3_color_sensor_get_color port=%d", port);
 	CHECK_PORT(port);
 	CHECK_COND(ev3_sensor_get_type(port) == COLOR_SENSOR, E_OBJ);
 
 	colorid_t val = COLOR_NONE;
+	syslog(LOG_EMERG , "ev3_color_sensor_get_color uart_sensor_fetch_data");
 	uart_sensor_fetch_data(port, COL_COLOR, &val, sizeof(val));
 	assert(val >= COLOR_NONE && val < TNUM_COLOR);
     return val;
 
 error_exit:
+	syslog(LOG_EMERG , "ev3_color_sensor_get_color error_exit ercd=%d", ercd);
 	syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
     return COLOR_NONE;
 }
@@ -138,14 +143,17 @@ uint8_t ev3_color_sensor_get_reflect(sensor_port_t port) {
 	ER ercd;
 
 //	lazy_initialize();
+	syslog(LOG_EMERG , "ev3_color_sensor_get_reflect port=%d", port);
 	CHECK_PORT(port);
 	CHECK_COND(ev3_sensor_get_type(port) == COLOR_SENSOR, E_OBJ);
 
+	syslog(LOG_EMERG , "ev3_color_sensor_get_reflect uart_sensor_fetch_data");
 	uint8_t val;
 	uart_sensor_fetch_data(port, COL_REFLECT, &val, sizeof(val));
     return val;
 
 error_exit:
+	syslog(LOG_EMERG , "ev3_color_sensor_get_reflect error_exit ercd=%d", ercd);
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
     return 0;
 }
@@ -154,14 +162,17 @@ uint8_t ev3_color_sensor_get_ambient(sensor_port_t port) {
 	ER ercd;
 
 //	lazy_initialize();
+	syslog(LOG_EMERG , "ev3_color_sensor_get_ambient port=%d", port);
 	CHECK_PORT(port);
 	CHECK_COND(ev3_sensor_get_type(port) == COLOR_SENSOR, E_OBJ);
 
+	syslog(LOG_EMERG , "ev3_color_sensor_get_ambient uart_sensor_fetch_data");
 	uint8_t val;
 	uart_sensor_fetch_data(port, COL_AMBIENT, &val, sizeof(val));
     return val;
 
 error_exit:
+	syslog(LOG_EMERG , "ev3_color_sensor_get_ambient ercd=%d", ercd);
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
     return 0;
 }
@@ -170,14 +181,17 @@ void ev3_color_sensor_get_rgb_raw(sensor_port_t port, rgb_raw_t *val) {
 	ER ercd;
 
 //	lazy_initialize();
+	syslog(LOG_EMERG , "ev3_color_sensor_get_rgb_raw port=%d", port);
 	CHECK_PORT(port);
 	CHECK_COND(ev3_sensor_get_type(port) == COLOR_SENSOR, E_OBJ);
 
+	syslog(LOG_EMERG , "ev3_color_sensor_get_rgb_raw uart_sensor_fetch_data");
 	uart_sensor_fetch_data(port, COL_RGBRAW, val, sizeof(rgb_raw_t));
 
     return;
 
 error_exit:
+	syslog(LOG_EMERG , "ev3_color_sensor_get_rgb_raw error_exit ercd=%d", ercd);
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
 }
 
@@ -192,14 +206,18 @@ int16_t ev3_gyro_sensor_get_angle(sensor_port_t port) {
 	ER ercd;
 
 //	lazy_initialize();
+	syslog(LOG_EMERG , "ev3_gyro_sensor_get_angle port=%d", port);
 	CHECK_PORT(port);
 	CHECK_COND(ev3_sensor_get_type(port) == GYRO_SENSOR, E_OBJ);
 
+	syslog(LOG_EMERG , "ev3_gyro_sensor_get_angle uart_sensor_fetch_data");
 	int16_t val;
 	uart_sensor_fetch_data(port, GYRO_ANG, &val, sizeof(val));
     return val;
 
 error_exit:
+    syslog(LOG_EMERG , "ev3_gyro_sensor_get_angle error_exit ercd=%d", ercd);
+   
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
     return 0;
 }
@@ -207,15 +225,22 @@ error_exit:
 int16_t ev3_gyro_sensor_get_rate(sensor_port_t port) {
 	ER ercd;
 
+	syslog(LOG_EMERG, "ev3_gyro_sensor_get_rate port=%d 1", port);
 //	lazy_initialize();
 	CHECK_PORT(port);
+	syslog(LOG_EMERG, "ev3_gyro_sensor_get_rate port=%d ev3_sensor_get_type(port)=%d GYRO_SENSOR=%d 2" , port, ev3_sensor_get_type(port), GYRO_SENSOR);
+	
 	CHECK_COND(ev3_sensor_get_type(port) == GYRO_SENSOR, E_OBJ);
+	syslog(LOG_EMERG, "ev3_gyro_sensor_get_rate port=%d 3", port);
 
+	syslog(LOG_EMERG, "ev3_gyro_sensor_get_rate uart_sensor_fetch_data");
 	int16_t val;
 	uart_sensor_fetch_data(port, GYRO_RATE, &val, sizeof(val));
+	syslog(LOG_EMERG, "ev3_gyro_sensor_get_rate port=%d 4", port);
     return val;
 
 error_exit:
+    syslog(LOG_EMERG, "ev3_gyro_sensor_get_rate error_exit ercd=%d", ercd);
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
     return 0;
 }
@@ -224,15 +249,18 @@ ER ev3_gyro_sensor_reset(sensor_port_t port) {
 	ER ercd;
 
 //	lazy_initialize();
+	syslog(LOG_EMERG, "ev3_gyro_sensor_reset port=%d 1", port);
 	CHECK_PORT(port);
 	CHECK_COND(ev3_sensor_get_type(port) == GYRO_SENSOR, E_OBJ);
 
+	syslog(LOG_EMERG, "ev3_gyro_sensor_reset uart_sensor_fetch_data");
 	//uart_sensor_switch_mode(port, GYRO_CAL);
 	uart_sensor_fetch_data(port, GYRO_CAL, NULL, 0);
 
 	return E_OK;
 
 error_exit:
+    syslog(LOG_EMERG, "ev3_gyro_sensor_get_reset error_exit ercd=%d", ercd);
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
     return ercd;
 }
@@ -247,17 +275,20 @@ int16_t ev3_ultrasonic_sensor_get_distance(sensor_port_t port) {
 	ER ercd;
 
 //	lazy_initialize();
+	syslog(LOG_EMERG, "ev3_ultrasonic_sensor_get_distance port=%d", port);
 	CHECK_PORT(port);
 	CHECK_COND(ev3_sensor_get_type(port) == ULTRASONIC_SENSOR, E_OBJ);
 
 #if 0
     return ev3_uart_sensor_get_short(port) / 10;
 #endif
+    syslog(LOG_EMERG, "ev3_ultrasonic_sensor_get_distance uart_sensor_fetch_data");
 	int16_t val = COLOR_NONE;
 	uart_sensor_fetch_data(port, US_DIST_CM, &val, sizeof(val));
     return val / 10;
 
 error_exit:
+    syslog(LOG_EMERG, "ev3_ultrasonic_sensor_get_distance error_exit ercd=%d", ercd);
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
     return 0;
 }
@@ -266,15 +297,18 @@ bool_t ev3_ultrasonic_sensor_listen(sensor_port_t port) {
 	ER ercd;
 
 //	lazy_initialize();
+	syslog(LOG_EMERG, "ev3_ultrasonic_sensor_listen port=%d", port);
 	CHECK_PORT(port);
 	CHECK_COND(ev3_sensor_get_type(port) == ULTRASONIC_SENSOR, E_OBJ);
 
+	syslog(LOG_EMERG, "ev3_ultrasonic_sensor_listen uart_sensor_fetch_data");
 	// TODO: TEST THIS API!
 	bool_t val;
 	uart_sensor_fetch_data(port, US_LISTEN, &val, sizeof(val));
     return val;
 
 error_exit:
+	syslog(LOG_EMERG, "ev3_ultrasonic_sensor_listen error_exit ercd=%d", ercd);
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
     return false;
 }
@@ -392,15 +426,18 @@ bool_t ev3_touch_sensor_is_pressed(sensor_port_t port) {
 	ER ercd;
 
 //	lazy_initialize();
+	syslog(LOG_EMERG, "ev3_touch_sensor_is_pressed port=%d", port);
 	CHECK_PORT(port);
 	CHECK_COND(ev3_sensor_get_type(port) == TOUCH_SENSOR, E_OBJ);
 
 	int16_t val;
+	syslog(LOG_EMERG, "ev3_touch_sensor_is_pressed uart_sensor_fetch_data");
 	uart_sensor_fetch_data(port, 0U, &val, sizeof(val));
 
     return val > (ADC_RES / 2);
 
 error_exit:
+	syslog(LOG_EMERG, "ev3_touch_sensor_is_pressed error_exit ercd=%d", ercd);
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
     return false;
 }
@@ -408,14 +445,17 @@ error_exit:
 bool_t ht_nxt_accel_sensor_measure(sensor_port_t port, int16_t axes[3]) {
 	ER ercd;
 
+	syslog(LOG_EMERG, "ht_next_accel_sensor_measure port=%d", port);
 	CHECK_PORT(port);
 	CHECK_COND(ev3_sensor_get_type(port) == HT_NXT_ACCEL_SENSOR, E_OBJ);
 
+	syslog(LOG_EMERG, "ht_next_accel_sensor_measure uart_sensor_fetch_data");
 	uart_sensor_fetch_data(port, 0U, axes, sizeof(int16_t) * 3);
 
 	return true;
 
 error_exit:
+	syslog(LOG_EMERG, "ht_next_accel_sensor_measure error_exit ercd=%d", ercd);
 	syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
 	return false;
 }
@@ -424,14 +464,17 @@ bool_t nxt_temp_sensor_measure(sensor_port_t port, float *temp) {
 	ER ercd;
 	int16_t raw;
 
+	syslog(LOG_EMERG, "nxt_temp_sensor_measure port=%d", port);
 	CHECK_PORT(port);
 	CHECK_COND(ev3_sensor_get_type(port) == NXT_TEMP_SENSOR, E_OBJ);
 
+	syslog(LOG_EMERG, "nxt_temp_sensor_measure uart_sensor_fetch_data");
 	uart_sensor_fetch_data(port, 0U, &raw, sizeof(raw));
     *temp = raw * 0.0625f;
 	return true;
 
 error_exit:
+	syslog(LOG_EMERG, "nxt_temp_sensor_measure error_exit ercd=%d", ercd);
 	syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
 	return false;
 }

@@ -62,6 +62,8 @@ static ER calibrate_gyro_sensor() {
 	int i;
     int gMn = 1000, gMx = -100, gSum = 0;
     for (i = 0; i < 200; ++i) {
+      syslog(LOG_WARNING, "calibrate_gyro_sensor i=%d", i);
+
         int gyro = ev3_gyro_sensor_get_rate(gyro_sensor);
         gSum += gyro;
         if (gyro > gMx)
@@ -105,6 +107,8 @@ static void update_interval_time() {
  * gyro_angle: the angle of the robot.
  */
 static void update_gyro_data() {
+      syslog(LOG_WARNING, "update_gyro_data");
+  
     int gyro = ev3_gyro_sensor_get_rate(gyro_sensor);
     gyro_offset = EMAOFFSET * gyro + (1 - EMAOFFSET) * gyro_offset;
     gyro_speed = gyro - gyro_offset;
@@ -192,7 +196,7 @@ static bool_t keep_balance() {
 void balance_task(intptr_t unused) {
     ER ercd;
     int i;
-    syslog(LOG_EMERG, "B-T 1");
+    syslog(LOG_EMERG , "B 1");
     /**
      * Reset
      */
@@ -200,15 +204,19 @@ void balance_task(intptr_t unused) {
     motor_control_drive = 0;
     ev3_motor_reset_counts(left_motor);
     ev3_motor_reset_counts(right_motor);
+    syslog(LOG_EMERG , "B 2");
     //TODO: reset the gyro sensor
     ev3_gyro_sensor_reset(gyro_sensor);
+    syslog(LOG_EMERG , "B 3");
 
     /**
      * Calibrate the gyro sensor and set the led to green if succeeded.
      */
     _debug(syslog(LOG_NOTICE, "Start calibration of the gyro sensor."));
     for(i = 10; i > 0; --i) { // Max retries: 10 times.
+    syslog(LOG_EMERG , "B A");
         ercd = calibrate_gyro_sensor();
+    syslog(LOG_EMERG , "B B");
         if(ercd == E_OK) break;
         if(i != 1)
             syslog(LOG_ERROR, "Calibration failed, retry.");
@@ -216,7 +224,9 @@ void balance_task(intptr_t unused) {
             syslog(LOG_ERROR, "Max retries for calibration exceeded, exit.");
             return;
         }
+    syslog(LOG_EMERG , "B C");
     }
+    syslog(LOG_EMERG , "B 4");
     _debug(syslog(LOG_INFO, "Calibration succeed, offset is %de-3.", (int)(gyro_offset * 1000)));
     gyro_angle = INIT_GYROANGLE;
     ev3_led_set_color(LED_GREEN);
@@ -226,6 +236,8 @@ void balance_task(intptr_t unused) {
      */
     syslog(LOG_EMERG, "B-T 2");
     while(1) {
+    syslog(LOG_EMERG , "B 51");
+      
         // Update the interval time
         update_interval_time();
 
@@ -235,6 +247,7 @@ void balance_task(intptr_t unused) {
         // Update data of the motors
         update_motor_data();
 
+    syslog(LOG_EMERG , "B 52");
         // Keep balance
         if(!keep_balance()) {
             ev3_motor_stop(left_motor, false);
@@ -244,7 +257,8 @@ void balance_task(intptr_t unused) {
             return;
         }
 
-    syslog(LOG_EMERG, "B-T 3");
+    syslog(LOG_EMERG , "B 53");
+
         tslp_tsk(WAIT_TIME_MS);
     syslog(LOG_EMERG, "B-T 4");
     }
@@ -296,9 +310,13 @@ static FILE *bt = NULL;
 
 void idle_task(intptr_t unused) {
     while(1) {
-    syslog(LOG_EMERG, "I-T 1");
-    	fprintf(bt, "Press 'h' for usage instructions.\n");
-    	tslp_tsk(1000);
+	syslog(LOG_EMERG, "  I 1");
+	/* syslog(LOG_EMERG, "Press 'h' for usage instructions."); */
+	/*    	syslog(LOG_NOTICE, "Press 'h' for usage instructions.");*/
+	/*    	fprintf(bt, "Press 'h' for usage instructions.\n");*/
+	/*   	tslp_tsk(1000);*/
+	 tslp_tsk(10);
+	syslog(LOG_EMERG, "  I 2");
     }
 }
 
@@ -324,7 +342,8 @@ static void put_log(LogDataType *data)
 #endif
 
 void main_task(intptr_t unused) {
-    syslog(LOG_EMERG, "M-T 1");
+    syslog(LOG_EMERG , " M 1");
+
     ev3_led_set_color(LED_GREEN);
     // Register button handlers
     ev3_button_set_on_clicked(BACK_BUTTON, button_clicked_handler, BACK_BUTTON);
@@ -340,7 +359,8 @@ void main_task(intptr_t unused) {
     ev3_motor_config(left_motor, LARGE_MOTOR);
     ev3_motor_config(right_motor, LARGE_MOTOR);
   
-    syslog(LOG_EMERG, "M-T 2");
+    syslog(LOG_EMERG , " M 2");
+
 #if 0 
     LogDataType log_data;
     int i = 0;
@@ -366,6 +386,7 @@ void main_task(intptr_t unused) {
         static float lasterror = 0, integral = 0;
         static float midpoint = (white - black) / 2 + black;
         {
+    syslog(LOG_EMERG , " M 3");
             float error = midpoint - ev3_color_sensor_get_reflect(EV3_PORT_1);
 #ifdef LIGHT_BRIGHT
             integral = error + integral * 0.01;
@@ -374,12 +395,14 @@ void main_task(intptr_t unused) {
             integral = error + integral * 0.05;
             float steer = 0.7 * error + 0.1 * integral + 1 * (error - lasterror);
 #endif
+    syslog(LOG_EMERG , " M 4");
             ev3_motor_steer(left_motor, right_motor, 10, steer);
+    syslog(LOG_EMERG , " M 5");
             lasterror = error;
+	    syslog(LOG_EMERG , " M 51 error=%d" , error);
         }
-    syslog(LOG_EMERG, "M-T 3");
         tslp_tsk(100000); /* 100msec */
-    syslog(LOG_EMERG, "M-T 4");
+    syslog(LOG_EMERG , " M 6");
 
     }
 }

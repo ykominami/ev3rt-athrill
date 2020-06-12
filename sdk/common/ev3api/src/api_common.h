@@ -11,6 +11,7 @@
 #define CHECK_COND(exp, _ercd) do {                         \
     if (!(exp)) {                                           \
         ercd = _ercd;                                       \
+	syslog(LOG_EMERG, "goto error_exit ");		    \
         goto error_exit;                                    \
     }                                                       \
 } while (false)
